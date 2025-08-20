@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 from flask import jsonify
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
 from sqlalchemy import asc, desc
@@ -21,7 +21,7 @@ def role_required(roles: Iterable[str]):
         return wrapper
     return decorator
 
-def apply_sorting(query: Query, model, sort: str | None) -> Query:
+def apply_sorting(query: Query, model, sort: Optional[str]) -> Query:
     """Apply sorting on a query. format: 'field' or '-field' for desc."""
     if not sort:
         return query

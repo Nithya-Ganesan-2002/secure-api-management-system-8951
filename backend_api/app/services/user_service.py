@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Optional as _Optional
 from ..extensions import db
 from ..models import User, Role
 
@@ -13,11 +13,11 @@ class UserService:
         items = q.offset((page - 1) * per_page).limit(per_page).all()
         return items, total
 
-    def create(self, email: str, full_name: str, password: str, roles: list[str] | None = None) -> User:
+    def create(self, email: str, full_name: str, password: str, roles: _Optional[List[str]] = None) -> User:
         user = User(email=email, full_name=full_name, is_active=True)
         user.set_password(password)
-        assigned_roles = []
-        for role_name in roles or ["user"]:
+        assigned_roles: List[Role] = []
+        for role_name in (roles or ["user"]):
             role = db.session.query(Role).filter_by(name=role_name).first()
             if not role:
                 role = Role(name=role_name, description=f"Auto-created role {role_name}")
@@ -28,7 +28,14 @@ class UserService:
         db.session.commit()
         return user
 
-    def update(self, user: User, full_name: str | None = None, password: str | None = None, is_active: bool | None = None, roles: list[str] | None = None) -> User:
+    def update(
+        self,
+        user: User,
+        full_name: _Optional[str] = None,
+        password: _Optional[str] = None,
+        is_active: _Optional[bool] = None,
+        roles: _Optional[List[str]] = None,
+    ) -> User:
         if full_name is not None:
             user.full_name = full_name
         if password is not None:
@@ -36,7 +43,7 @@ class UserService:
         if is_active is not None:
             user.is_active = is_active
         if roles is not None:
-            assigned_roles = []
+            assigned_roles: List[Role] = []
             for role_name in roles:
                 role = db.session.query(Role).filter_by(name=role_name).first()
                 if not role:
